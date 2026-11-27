@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video Downloader</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #121212;
+      color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 16px;
+      box-sizing: border-box;
+    }
+    .box {
+      background: #1e1e1e;
+      padding: 1.5rem;
+      border-radius: 14px;
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+    input {
+      width: 100%;
+      padding: 14px;
+      margin: 12px 0;
+      border-radius: 10px;
+      border: 1px solid #333;
+      background: #2a2a2a;
+      color: white;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    button {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      background: #fe2c55;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:disabled { background: #555; }
+    #status { margin-top: 14px; font-size: 0.9rem; color: #aaa; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h2>Video Downloader</h2>
+    <input type="url" id="urlInput" placeholder="Paste TikTok link here...">
+    <button id="dlBtn" onclick="downloadVideo()">Download MP4</button>
+    <p id="status"></p>
+  </div>
+
+  <script>
+    async function downloadVideo() {
+      const url = document.getElementById("urlInput").value.trim();
+      const btn = document.getElementById("dlBtn");
+      const status = document.getElementById("status");
+      if (!url) return;
+
+      btn.disabled = true;
+      status.textContent = "Grabbing video...";
+
+      try {
+        const res = await fetch("/download", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url })
+        });
+
+        if (!res.ok) throw new Error("Failed");
+
+        const blob = await res.blob();
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "video.mp4";
+        link.click();
+
+        status.textContent = "Saved!";
+      } catch (err) {
+        status.textContent = "Error: Link blocked or invalid.";
+      } finally {
+        btn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>
